@@ -34,8 +34,8 @@ class AddUser extends Base {
 				'group to add the user to'
 			)->addArgument(
 				'user',
-				InputArgument::REQUIRED,
-				'user to add to the group'
+				InputArgument::REQUIRED + InputArgument::IS_ARRAY,
+				'users to add to the group',
 			);
 	}
 
@@ -45,12 +45,18 @@ class AddUser extends Base {
 			$output->writeln('<error>group not found</error>');
 			return 1;
 		}
-		$user = $this->userManager->get($input->getArgument('user'));
-		if (is_null($user)) {
-			$output->writeln('<error>user not found</error>');
-			return 1;
+
+		$users = (array)$input->getArgument('user');
+		foreach ($users as $userId) {
+			$user = $this->userManager->get($userId);
+			if (is_null($user)) {
+				$output->writeln('<error>user ' . $userId . ' not found</error>');
+				return 1;
+			}
+			$group->addUser($user);
+			unset($user);
+			$output->writeln('<info>user ' . $userId . ' added</info>');
 		}
-		$group->addUser($user);
 		return 0;
 	}
 
