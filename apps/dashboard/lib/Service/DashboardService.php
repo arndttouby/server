@@ -37,7 +37,18 @@ class DashboardService {
 	 * @return list<string>
 	 */
 	public function sanitizeLayout(array $layout): array {
-		return $this->sanitizeStringList($layout);
+		$seen = [];
+		$result = [];
+		foreach ($layout as $value) {
+			if ($value === '' || isset($seen[$value])) {
+				continue;
+			}
+
+			$seen[$value] = true;
+			$result[] = $value;
+		}
+
+		return $result;
 	}
 
 	/**
@@ -75,26 +86,5 @@ class DashboardService {
 		}
 
 		return $birthdate->getValue();
-	}
-
-	/**
-	 * Keep insertion order while removing empty and duplicate values.
-	 *
-	 * @param list<string> $values
-	 * @return list<string>
-	 */
-	private function sanitizeStringList(array $values): array {
-		$seen = [];
-		$result = [];
-		foreach ($values as $value) {
-			if ($value === '' || isset($seen[$value])) {
-				continue;
-			}
-
-			$seen[$value] = true;
-			$result[] = $value;
-		}
-
-		return $result;
 	}
 }
