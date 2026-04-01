@@ -13,6 +13,12 @@
 			@reset="resetForm"
 			@closing="closeDialog" />
 
+		<EditUserDialog
+			v-if="editingUser"
+			:user="editingUser"
+			:quota-options="quotaOptions"
+			@closing="editingUser = null" />
+
 		<NcEmptyContent
 			v-if="filteredUsers.length === 0"
 			class="empty"
@@ -41,6 +47,7 @@
 				quotaOptions,
 				languages,
 				externalActions,
+				onEditUser: openEditDialog,
 			}"
 			@scroll-end="handleScrollEnd">
 			<template #before>
@@ -71,6 +78,7 @@ import { Fragment } from 'vue-frag'
 import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent'
 import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
 import NcLoadingIcon from '@nextcloud/vue/components/NcLoadingIcon'
+import EditUserDialog from './Users/EditUserDialog.vue'
 import NewUserDialog from './Users/NewUserDialog.vue'
 import UserListFooter from './Users/UserListFooter.vue'
 import UserListHeader from './Users/UserListHeader.vue'
@@ -80,13 +88,13 @@ import logger from '../logger.ts'
 import { defaultQuota, isObfuscated, unlimitedQuota } from '../utils/userUtils.ts'
 
 const newUser = Object.freeze({
-	id: '',
+	username: '',
 	displayName: '',
 	password: '',
-	mailAddress: '',
+	email: '',
 	groups: [],
 	manager: '',
-	subAdminsGroups: [],
+	subadminGroups: [],
 	quota: defaultQuota,
 	language: {
 		code: 'en',
@@ -98,6 +106,7 @@ export default {
 	name: 'UserList',
 
 	components: {
+		EditUserDialog,
 		Fragment,
 		NcEmptyContent,
 		NcIconSvgWrapper,
@@ -139,6 +148,7 @@ export default {
 			},
 
 			newUser: { ...newUser },
+			editingUser: null,
 			isInitialLoad: true,
 			searchQuery: '',
 		}
@@ -276,6 +286,10 @@ export default {
 	},
 
 	methods: {
+		openEditDialog(user) {
+			this.editingUser = user
+		},
+
 		async handleScrollEnd() {
 			await this.loadUsers()
 		},
