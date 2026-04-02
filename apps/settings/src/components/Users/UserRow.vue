@@ -10,7 +10,7 @@
 		<td class="row__cell row__cell--avatar" data-cy-user-list-cell-avatar>
 			<NcLoadingIcon
 				v-if="isLoadingUser"
-				:name="t('settings', 'Loading account …')"
+				:name="t('settings', 'Loading account …')"
 				:size="32" />
 			<NcAvatar
 				v-else-if="visible"

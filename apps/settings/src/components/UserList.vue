@@ -10,7 +10,6 @@
 			:loading="loading"
 			:new-user="newUser"
 			:quota-options="quotaOptions"
-			@reset="resetForm"
 			@closing="closeDialog" />
 
 		<EditUserDialog
@@ -73,7 +72,6 @@
 import { mdiAccountGroupOutline } from '@mdi/js'
 import { showError } from '@nextcloud/dialogs'
 import { subscribe, unsubscribe } from '@nextcloud/event-bus'
-import Vue from 'vue'
 import { Fragment } from 'vue-frag'
 import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent'
 import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
@@ -266,7 +264,7 @@ export default {
 		/**
 		 * Reset and init new user form
 		 */
-		this.resetForm()
+		this.initForm()
 
 		/**
 		 * Register search
@@ -343,25 +341,11 @@ export default {
 			this.search({ query: '' })
 		},
 
-		resetForm() {
-			// revert form to original state
-			this.newUser = { ...newUser }
-
-			/**
-			 * Init default language from server data. The use of this.settings
-			 * requires a computed variable, which break the v-model binding of the form,
-			 * this is a much easier solution than getter and setter on a computed var
-			 */
+		initForm() {
 			if (this.settings.defaultLanguage) {
-				Vue.set(this.newUser.language, 'code', this.settings.defaultLanguage)
+				this.newUser.language.code = this.settings.defaultLanguage
 			}
-
-			/**
-			 * In case the user directly loaded the user list within a group
-			 * the watch won't be triggered. We need to initialize it.
-			 */
 			this.setNewUserDefaultGroup(this.selectedGroup)
-
 			this.loading.all = false
 		},
 
