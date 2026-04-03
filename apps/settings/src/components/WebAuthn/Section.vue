@@ -9,6 +9,7 @@
 		<p class="settings-hint hidden-when-empty">
 			{{ t('settings', 'Set up your account for passwordless authentication following the FIDO2 standard.') }}
 		</p>
+
 		<NcNoteCard v-if="devices.length === 0" type="info">
 			{{ t('settings', 'No devices configured.') }}
 		</NcNoteCard>
