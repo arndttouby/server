@@ -27,9 +27,16 @@ const { app, isNarrow } = defineProps<{
 }>()
 
 const actions = useActions(() => app)
-const inlineActions = computed(() => !isNarrow || actions.value.length === 1
-	? actions.value.slice(0, 1)
-	: [])
+const inlineActions = computed(() => {
+	if (actions.value.length === 1) {
+		return [...actions.value]
+	}
+	if (isNarrow) {
+		return []
+	}
+	return actions.value.slice(0, 1)
+		.filter((action) => action.inline !== false)
+})
 const menuActions = computed(() => actions.value.slice(inlineActions.value.length))
 
 const route = useRoute()
@@ -74,15 +81,23 @@ const detailsRoute = computed(() => ({
 				<NcButton
 					v-for="action in inlineActions"
 					:key="action.id"
+					:ariaLabel="isNarrow ? action.label(app) : undefined"
+					:title="isNarrow ? action.label(app) : undefined"
 					:variant="action.variant"
 					@click="action.callback(app)">
-					{{ action.label(app) }}
+					<template #icon>
+						<NcIconSvgWrapper :path="action.icon" />
+					</template>
+					<template v-if="!isNarrow" #default>
+						{{ action.label(app) }}
+					</template>
 				</NcButton>
 				<NcActions forceMenu>
 					<NcActionButton
 						v-for="action in menuActions"
 						:key="action.id"
 						closeAfterClick
+						:variant="action.variant"
 						@click="action.callback(app)">
 						<template #icon>
 							<NcIconSvgWrapper :path="action.icon" />

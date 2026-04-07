@@ -9,6 +9,7 @@ import type { IAppstoreApp, IAppstoreCategory } from '../apps.d.ts'
 import axios from '@nextcloud/axios'
 import { confirmPassword } from '@nextcloud/password-confirmation'
 import { generateOcsUrl } from '@nextcloud/router'
+import PQueue from 'p-queue'
 import { APPSTORE_CATEGORY_ICONS } from '../constants.ts'
 
 const BASE_URL = generateOcsUrl('apps/appstore/api/v1')
@@ -22,14 +23,18 @@ const Url = Object.freeze({
 	update: `${BASE_URL}/apps/update`,
 })
 
+const queue = new PQueue({ concurrency: 1 })
+
 /**
  * Force enable app by ignoring its dependencies
  *
  * @param appId - The app to force enable
  */
 export async function forceEnableApp(appId: string) {
-	await confirmPassword()
-	await axios.post(Url.forceEnable, { appId })
+	return queue.add(async () => {
+		await confirmPassword()
+		await axios.post(Url.forceEnable, { appId })
+	})
 }
 
 /**
@@ -38,8 +43,10 @@ export async function forceEnableApp(appId: string) {
  * @param appId - The app to enable
  */
 export async function enableApp(appId: string) {
-	await confirmPassword()
-	await axios.post(Url.enable, { appId })
+	return queue.add(async () => {
+		await confirmPassword()
+		await axios.post(Url.enable, { appId })
+	})
 }
 
 /**
@@ -48,8 +55,10 @@ export async function enableApp(appId: string) {
  * @param appId - The app to disable
  */
 export async function disableApp(appId: string) {
-	await confirmPassword()
-	await axios.post(Url.disable, { appId })
+	return queue.add(async () => {
+		await confirmPassword()
+		await axios.post(Url.disable, { appId })
+	})
 }
 
 /**
@@ -58,8 +67,10 @@ export async function disableApp(appId: string) {
  * @param appId - The app id to update
  */
 export async function updateApp(appId: string) {
-	await confirmPassword()
-	await axios.post(Url.update, { appId })
+	return queue.add(async () => {
+		await confirmPassword()
+		await axios.post(Url.update, { appId })
+	})
 }
 
 /**
@@ -68,8 +79,10 @@ export async function updateApp(appId: string) {
  * @param appId - The app to uninstall
  */
 export async function uninstallApp(appId: string) {
-	await confirmPassword()
-	await axios.post(Url.uninstall, { appId })
+	return queue.add(async () => {
+		await confirmPassword()
+		await axios.post(Url.uninstall, { appId })
+	})
 }
 
 /**
