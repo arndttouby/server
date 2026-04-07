@@ -4,12 +4,12 @@
 -->
 
 <script setup lang="ts">
-import type { IAppstoreApp, IAppstoreExApp } from '../apps.ts';
+import type { IAppstoreApp, IAppstoreExApp } from '../../apps.d.ts'
 
 import { t } from '@nextcloud/l10n'
-import AppTableRow from './AppTableRow.vue';
-import { computed, useTemplateRef } from 'vue';
-import { useElementSize } from '@vueuse/core';
+import { useElementSize } from '@vueuse/core'
+import { computed, useTemplateRef } from 'vue'
+import AppTableRow from './AppTableRow.vue'
 
 defineProps<{
 	apps: (IAppstoreApp | IAppstoreExApp)[]
@@ -27,7 +27,9 @@ const isNarrow = computed(() => tableWidth.value < 768)
 			<tr>
 				<th>{{ t('appstore', 'App name') }}</th>
 				<th>{{ t('appstore', 'Version') }}</th>
-				<th v-if="!isNarrow">{{ t('appstore', 'Support level') }}</th>
+				<th v-if="!isNarrow">
+					{{ t('appstore', 'Support level') }}
+				</th>
 				<th>{{ t('appstore', 'Actions') }}</th>
 			</tr>
 		</thead>

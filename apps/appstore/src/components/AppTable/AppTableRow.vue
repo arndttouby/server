@@ -4,24 +4,25 @@
 -->
 
 <script setup lang="ts">
-import type { IAppstoreApp, IAppstoreExApp } from '../apps.ts'
+import type { IAppstoreApp, IAppstoreExApp } from '../../apps.d.ts'
 
 import { mdiInformationOutline } from '@mdi/js'
 import { t } from '@nextcloud/l10n'
-import { useRoute } from 'vue-router'
 import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import NcActionButton from '@nextcloud/vue/components/NcActionButton'
 import NcActionRouter from '@nextcloud/vue/components/NcActionRouter'
 import NcActions from '@nextcloud/vue/components/NcActions'
 import NcButton from '@nextcloud/vue/components/NcButton'
 import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
-import AppIcon from './AppIcon.vue'
-import AppLevelBadge from './AppLevelBadge.vue'
-import AppDaemonBadge from './AppDaemonBadge.vue'
-import { useActions } from '../composables/useActions.ts'
+import NcLoadingIcon from '@nextcloud/vue/components/NcLoadingIcon'
+import AppDaemonBadge from '../AppDaemonBadge.vue'
+import AppIcon from '../AppIcon.vue'
+import AppLevelBadge from '../AppLevelBadge.vue'
+import { useActions } from '../../composables/useActions.ts'
 
 const { app, isNarrow } = defineProps<{
-	app: IAppstoreApp | IAppstoreExApp,
+	app: IAppstoreApp | IAppstoreExApp
 	isNarrow?: boolean
 }>()
 
@@ -43,7 +44,7 @@ const detailsRoute = computed(() => ({
 
 <template>
 	<tr :class="$style.appTableRow">
-		<td>
+		<td :class="$style.appTableRow__nameCell">
 			<NcButton
 				alignment="start"
 				:title="t('appstore', 'Show details')"
@@ -51,9 +52,11 @@ const detailsRoute = computed(() => ({
 				variant="tertiary-no-background"
 				wide>
 				<template #icon>
-					<AppIcon :app :size="24" />
+					<NcLoadingIcon v-if="app.loading" :size="24" />
+					<AppIcon v-else :app :size="24" />
 				</template>
 				{{ app.name }}
+				<span v-if="app.loading" class="hidden-visually">({{ t('appstore', 'is loading…') }})</span>
 				<span class="hidden-visually">({{ t('appstore', 'Show details') }})</span>
 			</NcButton>
 		</td>
@@ -68,13 +71,14 @@ const detailsRoute = computed(() => ({
 		</td>
 		<td>
 			<div :class="$style.appTableRow__actionsCell">
-				<NcButton v-for="action in inlineActions"
+				<NcButton
+					v-for="action in inlineActions"
 					:key="action.id"
 					:variant="action.variant"
 					@click="action.callback(app)">
 					{{ action.label(app) }}
 				</NcButton>
-				<NcActions force-menu>
+				<NcActions forceMenu>
 					<NcActionButton
 						v-for="action in menuActions"
 						:key="action.id"
@@ -103,14 +107,13 @@ const detailsRoute = computed(() => ({
 }
 
 .appTableRow td {
-	padding-block: calc(var(--default-grid-baseline) / 2);
+	padding-block: var(--default-grid-baseline);
 	vertical-align: middle;
 }
 
 .appTableRow__nameCell {
-	display: flex;
-	align-items: center;
-	gap: var(--default-grid-baseline)
+	/* Padding is needed to have proper focus-visible */
+	padding-inline: var(--default-grid-baseline);
 }
 
 .appTableRow__levelCell {
