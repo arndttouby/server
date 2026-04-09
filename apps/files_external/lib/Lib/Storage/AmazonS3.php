@@ -705,8 +705,9 @@ class AmazonS3 extends Common {
 	}
 
 	public function hasUpdated(string $path, int $time): bool {
+		$path = $this->normalizePath($path);
 		// for files we can get the proper mtime
-		if ($path !== '' && $object = $this->headObject($path)) {
+		if (!$this->isRoot($path) && $object = $this->headObject($path)) {
 			$stat = $this->objectToMetaData($object);
 			return $stat['mtime'] > $time;
 		} else {
