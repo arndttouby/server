@@ -1410,9 +1410,17 @@ class View {
 				$data = $cache->get($internalPath);
 			} elseif (!Scanner::isPartialFile($internalPath) && $watcher->needsUpdate($internalPath, $data)) {
 				$this->lockFile($relativePath, ILockingProvider::LOCK_SHARED);
+				$storageMtimeBefore = $data['storage_mtime'] ?? null;
 				$watcher->update($internalPath, $data);
-				$storage->getPropagator()->propagateChange($internalPath, time());
 				$data = $cache->get($internalPath);
+				$storageMtimeAfter = $data['storage_mtime'] ?? null;
+
+				// Only propagate mtime change to parent folders if the storage actually reported a change,
+				// to avoid updating folder mtimes on every read for backends that unconditionally report directories as updated (e.g. S3)
+				if ($storageMtimeAfter !== $storageMtimeBefore) {
+					$storage->getPropagator()->propagateChange($internalPath, time());
+					$data = $cache->get($internalPath);
+				}
 				$this->unlockFile($relativePath, ILockingProvider::LOCK_SHARED);
 			}
 		} catch (LockedException $e) {
