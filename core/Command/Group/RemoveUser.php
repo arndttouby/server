@@ -34,8 +34,8 @@ class RemoveUser extends Base {
 				'group to remove the user from'
 			)->addArgument(
 				'user',
-				InputArgument::REQUIRED,
-				'user to remove from the group'
+				InputArgument::REQUIRED + InputArgument::IS_ARRAY,
+				'users to remove from the group'
 			);
 	}
 
@@ -45,12 +45,19 @@ class RemoveUser extends Base {
 			$output->writeln('<error>group not found</error>');
 			return 1;
 		}
-		$user = $this->userManager->get($input->getArgument('user'));
-		if (is_null($user)) {
-			$output->writeln('<error>user not found</error>');
-			return 1;
+
+		$users = (array)$input->getArgument('user');
+		foreach ($users as $userId) {
+			$user = $this->userManager->get($userId);
+			if (is_null($user)) {
+				$output->writeln('<error>user ' . $userId . ' not found</error>');
+				return 1;
+			}
+			$group->removeUser($user);
+			unset($user);
+			$output->writeln('<info>user ' . $userId . ' removed</info>');
 		}
-		$group->removeUser($user);
+
 		return 0;
 	}
 
